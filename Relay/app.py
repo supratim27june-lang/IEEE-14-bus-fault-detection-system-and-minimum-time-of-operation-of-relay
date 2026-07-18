@@ -95,7 +95,7 @@ if st.button("Predict & Optimize"):
 
     optimizer = PSO(
         num_particles=30,
-        iterations=50
+        iterations=10
     )
 
     best_position, best_time = optimizer.optimize(
