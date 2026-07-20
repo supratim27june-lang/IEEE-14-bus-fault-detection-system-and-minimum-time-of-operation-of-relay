@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 from sklearn.metrics import accuracy_score
 
-df = pd.read_csv("fault_dataset_60000.csv")
+df = pd.read_csv("fault_dataset_hard.csv")
 
 df = df.drop(columns=["row_id"])
 

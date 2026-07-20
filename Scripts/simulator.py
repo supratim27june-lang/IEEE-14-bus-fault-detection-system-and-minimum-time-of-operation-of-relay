@@ -13,6 +13,7 @@ import sys
 import matplotlib
 matplotlib.use("Agg")            # always works, no display needed to SAVE
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 import pandapower as pp
 import pandapower.networks as nw
@@ -197,11 +198,28 @@ def make_plots(net):
     # ---------- PLOT 3: simple network topology (built-in, safe) ----------
     try:
         import pandapower.plotting as pplot
-        fig3 = plt.figure(figsize=(9, 7))
-        pplot.simple_plot(net, respect_switches=True, show_plot=False)
+        fig3, ax3 = plt.subplots(figsize=(9, 7))
+        pplot.simple_plot(net, ax=ax3, respect_switches=True, show_plot=False)
+
+        ax3.set_title("IEEE 14-Bus — Network Diagram")
+        legend_handles = [
+            Line2D([0], [0], marker="o", color="w", markerfacecolor="#4f4f4f",
+                   markeredgecolor="#4f4f4f", markersize=8, label="Bus"),
+            Line2D([0], [0], color="#7f7f7f", lw=2, label="Line"),
+            Line2D([0], [0], marker="s", color="w", markerfacecolor="#f39c12",
+                   markeredgecolor="black", markersize=7, label="Load"),
+            Line2D([0], [0], marker="^", color="w", markerfacecolor="#2e7d32",
+                   markeredgecolor="black", markersize=7, label="Generator"),
+            Line2D([0], [0], marker="D", color="w", markerfacecolor="#c62828",
+                   markeredgecolor="black", markersize=7, label="Slack / Ext Grid"),
+        ]
+        ax3.legend(handles=legend_handles, loc="lower right", bbox_to_anchor=(1.0, 0.0),
+                   frameon=True, facecolor="white", edgecolor="#cccccc", fontsize=9)
+
+        fig3.tight_layout()
         path3 = os.path.abspath("ieee14_network.png")
-        plt.savefig(path3, dpi=140)
-        plt.close()
+        fig3.savefig(path3, dpi=140, bbox_inches="tight")
+        plt.close(fig3)
         saved_files.append(path3)
     except Exception as e:
         print(f"(Network diagram skipped: {e})")

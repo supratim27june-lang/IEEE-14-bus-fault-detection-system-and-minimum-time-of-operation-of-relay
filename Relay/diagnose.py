@@ -19,7 +19,7 @@ import joblib
 
 from features import FEATURES
 
-CSV = "fault_dataset_60000.csv"
+CSV = "fault_dataset_real.csv"
 PKL = "rf_fault_classifier.pkl"
 
 df = pd.read_csv(CSV)
@@ -48,16 +48,11 @@ print(">> mean ~0.99  => model is fine; the problem is the INPUT you feed it.")
 print(">> mean also low => the retrain itself is wrong (feature set too weak).")
 
 print("\n" + "=" * 64)
-print("3) THE EXACT HAND-TYPED optimize.py INPUT")
+print("3) A SINGLE REAL MEASURED ROW (full feature vector)")
 print("=" * 64)
-query = {
-    "fault_bus": 5,
-    "fault_impedance_ohm": 0.25,
-    "pre_fault_voltage_pu": 1.02,
-    "fault_voltage_pu": 0.64,
-    "loading_pu": 0.85,
-    "fault_current_ka": 5.8,
-}
+probe = df.sample(1, random_state=7).iloc[0]
+print("True fault type:", probe["fault_type"])
+query = {f: probe[f] for f in model_feats}
 X = pd.DataFrame([query]).reindex(columns=model_feats)
 p = model.predict_proba(X)[0]
 order = np.argsort(p)[::-1]
