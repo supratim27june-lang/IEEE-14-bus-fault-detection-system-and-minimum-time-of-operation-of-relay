@@ -22,7 +22,13 @@ Key corrections vs. the earlier version
 
 TDS_MIN = 0.05
 TDS_MAX = 1.20
-PICKUP_MIN = 0.50
+# PICKUP_MIN was 0.50, a leftover from the placeholder reference currents
+# (2-9 kA). objective.py now uses real bolted short-circuit duty, and the OC
+# (overload) zone current is as low as ~0.245 kA at the last relay -- with
+# PICKUP_MIN above that, no pickup below the OC fault current was reachable,
+# so the OC/fallback group could never pick up at all. Lowered to sit below
+# the smallest real zone current with margin.
+PICKUP_MIN = 0.20
 PICKUP_MAX = 5.00
 COORDINATION_TIME = 0.30
 NUM_RELAYS = 5
