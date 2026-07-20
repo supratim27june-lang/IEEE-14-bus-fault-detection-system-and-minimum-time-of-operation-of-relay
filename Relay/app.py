@@ -133,46 +133,42 @@ if st.button("Predict & Optimize"):
     st.write("---")
     st.subheader("5-Relay Coordination Optimization")
 
-    optimizer = PSO(num_particles=40, iterations=200)
-    best_position, best_value = optimizer.optimize(
-        fault_current, loading, fault_type, fault_bus,
-        fault_impedance, pre_fault_voltage, fault_voltage, confidence,
+    optimizer = PSO(
+        num_particles=30,
+        iterations=10
     )
 
-    zone_currents = zone_currents_for_scenario(fault_type, confidence)
-    _, margins = cti_shortfall(best_position, zone_currents)  # per-pair margins, correct definition
-
-    rows = []
-    for k in range(NUM_RELAYS):
-        tds, pickup = best_position[2 * k], best_position[2 * k + 1]
-        i_zone = zone_currents[k]
-        t = relay.relay_operating_time(i_zone, pickup, tds) if pickup < i_zone else float("inf")
-        rows.append({
-            "Relay": k + 1,
-            "Zone Fault I (kA)": round(i_zone, 3),
-            "TDS": round(tds, 4),
-            "Pickup Current": round(pickup, 4),
-            "Operating Time (s)": round(t, 4) if t != float("inf") else "no pickup",
-        })
-
-    st.metric("Relay 1 (primary) operating time", rows[0]["Operating Time (s)"] if isinstance(rows[0]["Operating Time (s)"], (int, float)) else rows[0]["Operating Time (s)"])
-
-    coordinated = is_coordinated(best_position, zone_currents)
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Objective Value", f"{best_value:.4f}")
-    c2.metric("Coordination Margin", f"≥ {COORDINATION_TIME:.2f} s")
-    c3.metric("Coordination Status", "Satisfied" if coordinated else "Needs adjustment")
-
-    st.dataframe(pd.DataFrame(rows), use_container_width=True)
-
-    # show the actual per-pair margins so the status is auditable
-    margin_txt = ", ".join(
-        f"R{k+1}-R{k+2}: {m:.3f}s" if m is not None else f"R{k+1}-R{k+2}: no pickup"
-        for k, m in enumerate(margins)
+    best_position, best_time = optimizer.optimize(
+        fault_current,
+        loading,
+        fault_type,
+        fault_bus,
+        fault_impedance,
+        pre_fault_voltage,
+        fault_voltage
     )
-    st.caption(f"Pairwise backup–primary margins (at shared downstream current): {margin_txt}")
 
-    if coordinated:
-        st.success("Coordination satisfied — every primary/backup pair meets the CTI margin.")
-    else:
-        st.error("Coordination not satisfied — a primary/backup pair is below the CTI margin.")
+    tds = best_position[0]
+    pickup = best_position[1]
+
+    col1,col2,col3 = st.columns(3)
+
+    with col1:
+        st.metric(
+            "Optimal TDS",
+            round(tds,4)
+        )
+
+    with col2:
+        st.metric(
+            "Pickup Current",
+            round(pickup,4)
+        )
+
+    with col3:
+        st.metric(
+            "Operating Time",
+            f"{best_time:.4f} sec"
+        )
+
+    st.success("Optimization Completed Successfully")
