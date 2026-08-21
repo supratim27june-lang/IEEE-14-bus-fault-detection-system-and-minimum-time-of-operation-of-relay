@@ -29,7 +29,7 @@ def _constructive_seed(zone_currents, loading):
     each ~CTI apart, with pickups above the zone load current."""
     pos = []
     for k in range(NUM_RELAYS):
-        pickup = max(PICKUP_MIN + 0.1, 1.25 * loading * (0.85 ** k) * 1.2)
+        pickup = max(PICKUP_MIN[k] + 0.1 * PICKUP_MIN[k], 1.25 * loading * (0.85 ** k) * 1.2)
         target = 0.25 + (COORDINATION_TIME + 0.1) * (NUM_RELAYS - 1 - k)
         ratio = zone_currents[k] / pickup
         tds = target * (ratio ** 0.02 - 1) / 0.14 if ratio > 1 else 0.5

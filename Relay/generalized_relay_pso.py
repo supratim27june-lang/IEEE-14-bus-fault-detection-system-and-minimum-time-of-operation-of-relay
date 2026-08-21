@@ -163,7 +163,7 @@ def conventional_settings(zone_currents, loading):
     pickups = []
     for k in range(NUM_RELAYS):
         pu = PICKUP_LOAD_MARGIN * loading * (ZONE_ATTENUATION ** k)
-        pu = min(max(pu, PICKUP_MIN), PICKUP_MAX)
+        pu = min(max(pu, PICKUP_MIN[k]), PICKUP_MAX)
         pickups.append(pu)
 
     # downstream-most relay: minimum TDS (as fast as allowed)

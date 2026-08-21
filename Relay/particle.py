@@ -23,14 +23,15 @@ from constraints import (
 class Particle:
     def __init__(self):
         self.TDS_MIN, self.TDS_MAX = TDS_MIN, TDS_MAX
+        # PICKUP_MIN is a per-relay list (CT-derived floor); PICKUP_MAX stays global.
         self.PICKUP_MIN, self.PICKUP_MAX = PICKUP_MIN, PICKUP_MAX
 
         self.position = []
         self.velocity = []
-        for _ in range(NUM_RELAYS):
+        for k in range(NUM_RELAYS):
             self.position.extend([
                 random.uniform(self.TDS_MIN, self.TDS_MAX),
-                random.uniform(self.PICKUP_MIN, self.PICKUP_MAX),
+                random.uniform(self.PICKUP_MIN[k], self.PICKUP_MAX),
             ])
             self.velocity.extend([
                 random.uniform(-0.1, 0.1),
@@ -53,7 +54,7 @@ class Particle:
             social = c2 * r2 * (global_best_position[i] - self.position[i])
             v = inertia * self.velocity[i] + cognitive + social
             # velocity clamp (20% of each dimension's range) for stability
-            lo = self.TDS_MIN if i % 2 == 0 else self.PICKUP_MIN
+            lo = self.TDS_MIN if i % 2 == 0 else self.PICKUP_MIN[i // 2]
             hi = self.TDS_MAX if i % 2 == 0 else self.PICKUP_MAX
             vmax = 0.2 * (hi - lo)
             self.velocity[i] = max(-vmax, min(v, vmax))
@@ -65,8 +66,9 @@ class Particle:
 
     def _clamp(self):
         for relay_idx in range(0, len(self.position), 2):
+            k = relay_idx // 2
             self.position[relay_idx] = max(self.TDS_MIN, min(self.position[relay_idx], self.TDS_MAX))
-            self.position[relay_idx + 1] = max(self.PICKUP_MIN, min(self.position[relay_idx + 1], self.PICKUP_MAX))
+            self.position[relay_idx + 1] = max(self.PICKUP_MIN[k], min(self.position[relay_idx + 1], self.PICKUP_MAX))
 
     def print_particle(self):
         print("\nParticle\n--------------------------")
